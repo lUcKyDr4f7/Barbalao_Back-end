@@ -2,7 +2,7 @@
 
   
 
-API REST em **Flask** para gerenciamento de barbearia (produtos, categorias e banners).
+API REST em **Flask** para gerenciamento de um Bar um Aguas de Lyndóia  (produtos, categorias e banners).
 
   
 
@@ -127,7 +127,7 @@ API rodando em `https://back-end-barbalao.onrender.com`
 
 ```
 
-Flask, Flask-CORS, psycopg2-binary, cryptography
+Flask, Flask-CORS, psycopg2-binary, cryptographyF
 
 ```
 
