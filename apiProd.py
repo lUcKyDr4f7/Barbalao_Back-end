@@ -2,25 +2,14 @@ from flask import Flask, request, jsonify, session, Blueprint
 from encrypt import verify_password, hash_password
 from datetime import timedelta
 from flask_cors import CORS
+from db import cursor, conn, start_db
 import psycopg2
 import os
 
-class Database:
-    def __init__(self):
-        self.config = {
-            "dbname": "banco_barbalao",
-            "user": "root",
-            "password": "DdDLJr8BYykOf9hJL9TWXP2eDsF2A8S6",
-            "host": "dpg-d42kp3i4d50c739qr750-a.oregon-postgres.render.com",
-            "port": "5432",
-        }
-
-    def get_conn(self):
-        return psycopg2.connect(**self.config)
+start_db()
 
 class AuthController:
-    def __init__(self, db: Database):
-        self.db = db
+    def __init__(self):
         self.bp = Blueprint('auth', __name__, url_prefix='/api')
 
         self.bp.route('/login/', methods=['POST', 'OPTIONS'])(self.login)
@@ -37,8 +26,6 @@ class AuthController:
         senha = data.get('senha')
 
         try:
-            conn = self.db.get_conn()
-            cursor = conn.cursor()
             cursor.execute('SELECT * FROM usuario WHERE nome_user = %s', (nome,))
             usuario = cursor.fetchone()
             cursor.close()
@@ -64,8 +51,7 @@ class AuthController:
 
 
 class ProductController:
-    def __init__(self, db: Database):
-        self.db = db
+    def __init__(self):
         self.bp = Blueprint('products', __name__, url_prefix='/api/products')
 
         self.bp.route('/', methods=['POST'])(self.create_product)
@@ -89,8 +75,6 @@ class ProductController:
             return jsonify({"message": "Campos obrigatórios: nome e preco"}), 400
 
         try:
-            conn = self.db.get_conn()
-            cursor = conn.cursor()
             cursor.execute(
                 '''
                 INSERT INTO produto(nome_prod, preco_prod, descricao_prod, imagem_prod, categoria_id_categoria, usuario_id_user)
@@ -111,8 +95,6 @@ class ProductController:
 
     def list_products(self):
         try:
-            conn = self.db.get_conn()
-            cursor = conn.cursor()
             cursor.execute('''
                 SELECT id_prod, nome_prod, preco_prod, descricao_prod, imagem_prod, categoria_id_categoria 
                 FROM produto;
@@ -147,9 +129,6 @@ class ProductController:
 
     def _update(self, id_value, table, id_column, update_data):
         try:
-            conn = self.db.get_conn()
-            cursor = conn.cursor()
-
             set_clause = ", ".join([f"{key} = %s" for key in update_data.keys()])
             values = list(update_data.values())
             values.append(id_value)
@@ -173,8 +152,6 @@ class ProductController:
 
     def _remove(self, id, table, idEspecifico):
         try:
-            conn = self.db.get_conn()
-            cursor = conn.cursor()
             cursor.execute(f'DELETE FROM {table} WHERE {idEspecifico} = %s', (id,))
             conn.commit()
 
@@ -193,8 +170,7 @@ class ProductController:
 
 
 class CategoryController:
-    def __init__(self, db: Database):
-        self.db = db
+    def __init__(self):
         self.bp = Blueprint('categories', __name__, url_prefix='/api/categoria')
 
         self.bp.route('/', methods=['POST'])(self.create_categ)
@@ -217,9 +193,6 @@ class CategoryController:
             return jsonify({"message": "Campos obrigatórios: nome e imagem"}), 400
 
         try:
-            conn = self.db.get_conn()
-            cursor = conn.cursor()
-
             if categoria is None:
                 cursor.execute(
                     '''
@@ -248,8 +221,6 @@ class CategoryController:
 
     def list_categ(self):
         try:
-            conn = self.db.get_conn()
-            cursor = conn.cursor()
             cursor.execute('''
                 SELECT 
                     id_categoria, 
@@ -280,8 +251,6 @@ class CategoryController:
 
     def list_categ_principais(self):
         try:
-            conn = self.db.get_conn()
-            cursor = conn.cursor()
             cursor.execute('''
                 SELECT id_categoria, nome_categ, imagm_categ, usuario_id_user
                 FROM categoria 
@@ -315,9 +284,6 @@ class CategoryController:
 
     def _update(self, id_value, table, id_column, update_data):
         try:
-            conn = self.db.get_conn()
-            cursor = conn.cursor()
-
             set_clause = ", ".join([f"{key} = %s" for key in update_data.keys()])
             values = list(update_data.values())
             values.append(id_value)
@@ -341,8 +307,6 @@ class CategoryController:
 
     def _remove(self, id, table, idEspecifico):
         try:
-            conn = self.db.get_conn()
-            cursor = conn.cursor()
             cursor.execute(f'DELETE FROM {table} WHERE {idEspecifico} = %s', (id,))
             conn.commit()
 
@@ -362,7 +326,6 @@ class CategoryController:
 
 class BannerController:
     def __init__(self, db: Database):
-        self.db = db
         self.bp = Blueprint('banners', __name__, url_prefix='/api/banner')
 
         self.bp.route('/', methods=['POST'])(self.create_banner)
@@ -384,8 +347,6 @@ class BannerController:
             return jsonify({"message": "Campos obrigatórios: titulo e imagem"}), 400
 
         try:
-            conn = self.db.get_conn()
-            cursor = conn.cursor()
             cursor.execute(
                 '''
                 INSERT INTO banners (titulo_banner, sub_titulo_banner, imagem_banner, usuario_id_user)
@@ -406,8 +367,6 @@ class BannerController:
 
     def list_banner(self):
         try:
-            conn = self.db.get_conn()
-            cursor = conn.cursor()
             cursor.execute('''
                 SELECT id_banner, titulo_banner, sub_titulo_banner, imagem_banner, usuario_id_user 
                 FROM banners;
@@ -441,9 +400,6 @@ class BannerController:
 
     def _update(self, id_value, table, id_column, update_data):
         try:
-            conn = self.db.get_conn()
-            cursor = conn.cursor()
-
             set_clause = ", ".join([f"{key} = %s" for key in update_data.keys()])
             values = list(update_data.values())
             values.append(id_value)
@@ -467,8 +423,6 @@ class BannerController:
 
     def _remove(self, id, table, idEspecifico):
         try:
-            conn = self.db.get_conn()
-            cursor = conn.cursor()
             cursor.execute(f'DELETE FROM {table} WHERE {idEspecifico} = %s', (id,))
             conn.commit()
 
@@ -489,7 +443,6 @@ class BannerController:
 class App:
     def __init__(self):
         self.app = Flask(__name__)
-        self.db = Database()
         self.configure_app()
         self.register_routes()
 
@@ -515,10 +468,10 @@ class App:
              allow_headers=["Content-Type", "Authorization"])
 
     def register_routes(self):
-        auth_controller = AuthController(self.db)
-        product_controller = ProductController(self.db)
-        category_controller = CategoryController(self.db)
-        banner_controller = BannerController(self.db)
+        auth_controller = AuthController()
+        product_controller = ProductController()
+        category_controller = CategoryController()
+        banner_controller = BannerController()
 
         self.app.register_blueprint(auth_controller.bp)
         self.app.register_blueprint(product_controller.bp)
