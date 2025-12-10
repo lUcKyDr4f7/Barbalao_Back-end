@@ -1,7 +1,7 @@
 import sqlite3
 from encrypt import hash_password
 
-while True:
+def start_db():
     try:
         conn = sqlite3.connect("bar_balao.db")
         cursor = conn.cursor()
