@@ -1,24 +1,17 @@
-import psycopg2
+import sqlite3
 from encrypt import hash_password
 
 while True:
     try:
-        conn = psycopg2.connect(
-            dbname="banco_barbalao",  
-            user="root",       
-            password="DdDLJr8BYykOf9hJL9TWXP2eDsF2A8S6",    
-            host="dpg-d42kp3i4d50c739qr750-a.oregon-postgres.render.com",            
-            port="5432"
-        )
+        conn = sqlite3.connect("aula07.db")
         cursor = conn.cursor()
-
         # cursor.execute("DROP TABLE IF EXISTS categoria CASCADE;")
         # cursor.execute("DROP TABLE IF EXISTS produto CASCADE")
         # cursor.execute("DROP TABLE IF EXISTS usuario CASCADE")
         # cursor.execute("DROP TABLE IF EXISTS adicionais CASCADE")
         # cursor.execute("DROP TABLE IF EXISTS categoria_has_adicionais CASCADE")
         # cursor.execute("DROP TABLE IF EXISTS banners CASCADE")
-        conn.commit()
+        # conn.commit()
 
 
         cursor.execute(
@@ -118,6 +111,6 @@ while True:
         conn.commit()
         conn.close()
 
-    except psycopg2.Error as e: 
+    except Exception as e: 
         print(f"Erro não legal: {e}")
         continue
