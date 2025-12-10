@@ -3,7 +3,7 @@ from encrypt import hash_password
 
 while True:
     try:
-        conn = sqlite3.connect("aula07.db")
+        conn = sqlite3.connect("bar_balao.db")
         cursor = conn.cursor()
         # cursor.execute("DROP TABLE IF EXISTS categoria CASCADE;")
         # cursor.execute("DROP TABLE IF EXISTS produto CASCADE")
